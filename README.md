@@ -1,11 +1,11 @@
 # Location-opening-restaurants
 
-##File descriptions
+## File descriptions
 train.csv - the training set. Use this dataset for training your model. 
 test.csv - the test set. To deter manual "guess" predictions, Kaggle has supplemented the test set with additional "ignored" data. These are not counted in the scoring.
 sampleSubmission.csv - a sample submission file in the correct format
 
-##Data fields
+## Data fields
 Id : Restaurant id. 
 Open Date : opening date for a restaurant
 City : City that the restaurant is in. Note that there are unicode in the names. 
