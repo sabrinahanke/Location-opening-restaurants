@@ -18,6 +18,18 @@ test_path = "https://raw.githubusercontent.com/sabrinahanke/Location-opening-res
 df_test = pd.read_csv(test_path, index_col='Id')
 df_test.head()
 
+## Checking for  the number of rows and columns in the dataset using pandas
+print(f"Number of rows :{df_train.shape[0]} \nNumber of columns:{df_train.shape[1]}")
+
+#retreiving info about data
+df_train.info()
+
+# analyse data type of each column
+df_train.dtypes
+
+# check for null entries 
+df_train.isna().sum()
+
 # visualization
 # 1. Where to open a restaurant?
 # 2. When to open a restaurant?
