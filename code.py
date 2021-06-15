@@ -84,9 +84,7 @@ def revenue_analysis():
 # divide train_data set
 def split():
     train_modified = train_data.drop(
-        labels=['City', 'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'P9', 'P10', 'P11', 'P12', 'P13', 'P14', 'P15',
-                'P16', 'P17', 'P18', 'P19', 'P20', 'P21', 'P22', 'P23', 'P24', 'P25', 'P26', 'P27', 'P28', 'P29', 'P30',
-                'P31', 'P32', 'P33', 'P34', 'P35', 'P36', 'P37'], axis=1)
+        labels=['City'], axis=1)
     train, test = sk.train_test_split(train_modified, test_size=0.25, train_size=0.75)
     # print(train)
     # print(test)
@@ -105,11 +103,14 @@ def predict():
     train, test = split()
 
     # prepare data 
+    # change data type of Open Date (str -> int/float)
+
     # train
     train.replace('Big Cities', 1, inplace=True)
     train.replace('Other', 0, inplace=True)
     train.replace('IL', 1, inplace=True)
     train.replace('FC', 0, inplace=True)
+    train.replace('DT', 2, inplace=True)
     tempSeries1 = pd.Series(dtype=int)
     train.replace(to_replace=r'^01', value=1, regex=True, inplace=True)
     train.replace(r'^02', 2, regex=True, inplace=True)
@@ -123,16 +124,13 @@ def predict():
     train.replace(r'^10', 10, regex=True, inplace=True)
     train.replace(r'^11', 11, regex=True, inplace=True)
     train.replace(r'^12', 12, regex=True, inplace=True)
-    # for i in train['Open Date'].values:
-    #     tempSeries1[i] = i[:2]
-    # train.append(tempSeries1, ignore_index=True)
-
-
+  
     # test
     test.replace('Big Cities', 1, inplace=True)
     test.replace('Other', 0, inplace=True)
     test.replace('IL', 1, inplace=True)
     test.replace('FC', 0, inplace=True)
+    test.replace('DT', 2, inplace=True)
     test.replace(r'^01', 1, regex=True, inplace=True)
     test.replace(r'^02', 2, regex=True, inplace=True)
     test.replace(r'^03', 3, regex=True, inplace=True)
@@ -147,31 +145,30 @@ def predict():
     test.replace(r'^12', 12, regex=True, inplace=True)
     # test['Open Date'] = test['Open Date'].values[:2]
 
-    # change data type of Open Date (str -> int/float)
-    '''
-    train['Open Date'] = train['Open Date'].astype(int)
-    test['Open Date'] = test['Open Date'].astype(int)
-    pd.to_numeric(train['Open Date'], downcast = 'integer')
-    '''
     print(train.to_string())
 
     # apply regression model
-    # tempSeries = pd.Series(test['Open Date'], dtype=np.int32)
-    # test['Open Date'] = tempSeries
-    # print(train.head(2))
+    '''
+    tempSeries = pd.Series(test['Open Date'], dtype=np.int32)
+    test['Open Date'] = tempSeries
+    print(train.head(2))
 
-    # rf = RandomForestRegressor(n_estimators=1000, random_state=42)
-    # rf.fit(features, labels)
+    rf = RandomForestRegressor(n_estimators=1000, random_state=42)
+    rf.fit(features, labels)
+    '''
 
+    from sklearn.ensemble import RandomForestRegressor
+    from sklearn.datasets import make_regression
+    X, y = make_regression(n_features=41, n_informative=2, random_state=0, shuffle=False)
+    regr = RandomForestRegressor(max_depth=2, random_state=0)
+    regr.fit(X, y)
 
-'''from sklearn.ensemble import RandomForestRegressor
-from sklearn.datasets import make_regression
-X, y = make_regression(n_features=3, n_informative=2, random_state=0, shuffle=False)
-regr = RandomForestRegressor(max_depth=2, random_state=0)
-regr.fit(X, y)
+    print(regr.predict(train))
 
-print(regr.predict([[0, 0, 0, 0]]))'''
-
+    # print result 
+    file = open('jasminsDataframe.html', 'x')
+    file.write(train.to_html())
+    file.close()
 
 # apply machine learning
 
@@ -193,7 +190,5 @@ print(regr.predict([[0, 0, 0, 0]]))'''
 
 def main():
     predict()
-
-
 if __name__ == "__main__":
     main()
