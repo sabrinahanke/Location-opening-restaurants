@@ -26,11 +26,9 @@ def format():
     print('dtype: ', train_data.dtypes)  # analyse data type of each column
     print('First 3 rows of the train data:', train_data.head(3))
 
-
 # analyse train data
 def check_data():
     train_data.isna().sum()  # check for null entries
-
 
 # disply missings
 def missing_values():
@@ -40,46 +38,7 @@ def missing_values():
     print('Missings in the train data:', train_data.isnull().sum())
 
 
-# data is ready to be worked with!
-
-
-def juhu():
-    """
-    Celebrates that the data set was already pretty nice so we didn't have to do a lot lol
-    """
-    print('Data is all clean and ready to be worked with!')
-
-
-# statistical analysis
-
-# calculate basic statistics
-def basic_statistics():
-    """
-    Gives back basic statistical calculations
-    """
-    train_data['revenue'].describe()
-
-
-# question-specific statisitcs
-# open date
-
-# city
-# train_data.groupby("City")["Id"].count()
-# train_data.groupby(["City"], ["Type"])["Id"].count()
-
-# city group
-
-# restaurant type
-# train_data.groupby("Type")["Id"].count()
-
-# revenue
-def revenue_analysis():
-    print('ID of most profitable restarant:', train_data["revenue"].max)
-
-
-# visualization
-
-# identify most, least and average profitable restaurant
+#prepare data
 
 # divide train_data set
 def split():
@@ -91,14 +50,28 @@ def split():
     return train, test
 
 
+# statistical analysis
+
+# calculate basic statistics
+def basic_statistics():
+    """
+    Gives back basic statistical calculations
+    """
+    train_data['revenue'].describe()
+
 # 1. Where to open a restaurant?
 def where():
     train, test = split()
     train = train.drop(lables=['Open Date', 'Type'])
     test = test.drop(lables=['Open Date', 'Type'])
 
+# 2. When to open a restaurant?
+
+# 3. Which type of restaurant is most profitable?
+
 
 # revenue prediciton (Decision Tree)
+
 def predict():
     train, test = split()
 
