@@ -26,9 +26,11 @@ def format():
     print('dtype: ', train_data.dtypes)  # analyse data type of each column
     print('First 3 rows of the train data:', train_data.head(3))
 
+
 # analyse train data
 def check_data():
     train_data.isna().sum()  # check for null entries
+
 
 # disply missings
 def missing_values():
@@ -38,16 +40,14 @@ def missing_values():
     print('Missings in the train data:', train_data.isnull().sum())
 
 
-#prepare data
+# data is ready to be worked with!
 
-# divide train_data set
-def split():
-    train_modified = train_data.drop(
-        labels=['City'], axis=1)
-    train, test = sk.train_test_split(train_modified, test_size=0.25, train_size=0.75)
-    # print(train)
-    # print(test)
-    return train, test
+
+def juhu():
+    """
+    Celebrates that the data set was already pretty nice so we didn't have to do a lot lol
+    """
+    print('Data is all clean and ready to be worked with!')
 
 
 # statistical analysis
@@ -59,19 +59,46 @@ def basic_statistics():
     """
     train_data['revenue'].describe()
 
+
+# question-specific statisitcs
+# open date
+
+# city
+# train_data.groupby("City")["Id"].count()
+# train_data.groupby(["City"], ["Type"])["Id"].count()
+
+# city group
+
+# restaurant type
+# train_data.groupby("Type")["Id"].count()
+
+# revenue
+def revenue_analysis():
+    print('ID of most profitable restarant:', train_data["revenue"].max)
+
+
+# visualization
+
+# identify most, least and average profitable restaurant
+
+# divide train_data set
+def split():
+    train_modified = train_data.drop(
+        labels=['City'], axis=1)
+    train, test = sk.train_test_split(train_modified, test_size=0.25, train_size=0.75)
+    # print(train)
+    # print(test)
+    return train, test
+
+
 # 1. Where to open a restaurant?
 def where():
     train, test = split()
     train = train.drop(lables=['Open Date', 'Type'])
     test = test.drop(lables=['Open Date', 'Type'])
 
-# 2. When to open a restaurant?
-
-# 3. Which type of restaurant is most profitable?
-
 
 # revenue prediciton (Decision Tree)
-
 def predict():
     train, test = split()
 
@@ -158,7 +185,31 @@ def predict():
 
 
 # 2. When to open a restaurant?
+
+# Time Series of revenues generated
+df_timeseries = pd.read_csv('/kaggle/input/restaurant-revenue-prediction/train.csv.zip',
+                             parse_dates=['Open Date'],
+                             index_col= ['Open Date'],
+                             na_values=['999.99'])
+sns.lineplot(data=df_timeseries, x='Open Date', y='revenue')
+plt.show()
+
+
 # 3. Which type is the best economic choice?
+
+fig, ax = plt.subplots(3, 1, figsize=(40, 30))
+for variable, subplot in zip(categorical_features, ax.flatten()):
+    df_2 = df_train[[variable,'revenue']].groupby(variable).revenue.sum().reset_index()
+    df_2.columns = [variable,'total_revenue']
+    sns.barplot(x=variable, y='total_revenue', data=df_2 , ax=subplot)
+    subplot.set_xlabel(variable,fontsize=20)
+    subplot.set_ylabel('Total Revenue',fontsize=20)
+    for label in subplot.get_xticklabels():
+        label.set_rotation(45)
+        label.set_size(20)
+    for label in subplot.get_yticklabels():
+        label.set_size(20)
+fig.tight_layout()
 
 
 def main():
