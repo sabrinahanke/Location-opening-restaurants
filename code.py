@@ -187,12 +187,22 @@ def predict():
 
 # 2. When to open a restaurant?
 
-# Time Series of revenues generated
-df_timeseries = pd.read_csv('/kaggle/input/restaurant-revenue-prediction/train.csv.zip',
-                             parse_dates=['Open Date'],
-                             index_col= ['Open Date'],
-                             na_values=['999.99'])
-sns.lineplot(data=df_timeseries, x='Open Date', y='revenue')
+# extract month
+df_train['month'] = pd.DatetimeIndex(df_train['Open Date']).month
+print(df_train)
+
+#group by month
+df_3 = df_train[['month','revenue']].groupby('month').revenue.sum()
+print(df_3)
+
+#bar chart months by revenue
+divisions = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+division_average_marks = [64909366.0, 46080202.0, 43665123.0, 23630484.0, 36578002.0, 33985929.0, 27668769.0, 66011346.0, 59299412.0, 78552564.0, 56656797.0, 73095974.0]
+
+plt.bar(divisions, division_average_marks, color='red')
+plt.title('When is the best month to open a restaurant?')
+plt.xlabel('Months Jan-Dec')
+plt.ylabel('Revenue')
 plt.show()
 
 # extract month
@@ -202,19 +212,20 @@ print(df_train)
 
 # 3. Which type is the best economic choice?
 
-fig, ax = plt.subplots(3, 1, figsize=(40, 30))
-for variable, subplot in zip(categorical_features, ax.flatten()):
-    df_2 = df_train[[variable,'revenue']].groupby(variable).revenue.sum().reset_index()
-    df_2.columns = [variable,'total_revenue']
-    sns.barplot(x=variable, y='total_revenue', data=df_2 , ax=subplot)
-    subplot.set_xlabel(variable,fontsize=20)
-    subplot.set_ylabel('Total Revenue',fontsize=20)
-    for label in subplot.get_xticklabels():
-        label.set_rotation(45)
-        label.set_size(20)
-    for label in subplot.get_yticklabels():
-        label.set_size(20)
-fig.tight_layout()
+# group by type
+df_3 = df_train[['Type','revenue']].groupby('Type').revenue.sum()
+print(df_3)
+
+# bar chart type by revenue
+
+divisions = ['Food Court', 'In Line', 'Drive Through']
+division_average_marks = [3810007.0, 355981207.0, 250342754.0]
+
+plt.bar(divisions, division_average_marks, color='blue')
+plt.title('Which type makes the most revenue?')
+plt.xlabel('Types of restaurants')
+plt.ylabel('Revenue')
+plt.show()
 
 
 def main():
