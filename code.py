@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt  # needed for seaborn
 import IPython as IPy  # needed for hab's vergessen und bin zu faul zum googeln
 import sklearn.model_selection as sk
 from sklearn.ensemble import RandomForestRegressor
+import datetime
 
 # import data sets
 
@@ -194,6 +195,10 @@ df_timeseries = pd.read_csv('/kaggle/input/restaurant-revenue-prediction/train.c
 sns.lineplot(data=df_timeseries, x='Open Date', y='revenue')
 plt.show()
 
+# extract month
+
+df_train['month'] = pd.DatetimeIndex(df_train['Open Date']).month
+print(df_train)
 
 # 3. Which type is the best economic choice?
 
