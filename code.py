@@ -98,9 +98,65 @@ def where():
     train = train.drop(lables=['Open Date', 'Type'])
     test = test.drop(lables=['Open Date', 'Type'])
 
+# 2. When to open a restaurant?
+def when():
+    '''
+    extract month
+    '''
+    train_data['month'] = pd.DatetimeIndex(train_data['Open Date']).month
+    print(train_data)
 
-# revenue prediciton (Decision Tree)
-def predict():
+    #group by month
+    df_3 = train_data[['month','revenue']].groupby('month').revenue.sum()
+    print(df_3)
+
+    #bar chart months by revenue
+    divisions = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
+    division_average_marks = [64909366.0, 46080202.0, 43665123.0, 23630484.0, 36578002.0, 33985929.0, 27668769.0, 66011346.0, 59299412.0, 78552564.0, 56656797.0, 73095974.0]
+
+    plt.bar(divisions, division_average_marks, color='red')
+    plt.title('When is the best month to open a restaurant?')
+    plt.xlabel('Months Jan-Dec')
+    plt.ylabel('Revenue')
+    plt.show()
+
+    # extract month
+
+    train_data['month'] = pd.DatetimeIndex(train_data['Open Date']).month
+    print(train_data)
+
+
+# 3. Which type is the best economic choice?
+def type():
+    '''
+    plots restaurant type against average revenue
+    '''
+    # group by type
+    df_3 = train_data[['Type','revenue']].groupby('Type').revenue.mean()
+    print(df_3)
+
+    # bar chart: type by revenue
+    divisions = ['Food Court', 'In Line', 'Drive Through']
+    division_average_marks = [3810007.0, 355981207.0, 250342754.0]
+
+    plt.bar(divisions, division_average_marks, color='blue')
+    plt.title('Which type makes the most revenue?')
+    plt.xlabel('Types of restaurants')
+    plt.ylabel('Revenue')
+    plt.show()
+
+
+# PREDICTION TOOL
+def prep():
+    '''
+    divides train_data into test and training set
+    '''
+
+
+def random_forest():
+    '''
+    Random Forest Regressor
+    '''
     train, test = split()
 
     # prepare data 
@@ -144,19 +200,8 @@ def predict():
     test.replace(r'^10', 10, regex=True, inplace=True)
     test.replace(r'^11', 11, regex=True, inplace=True)
     test.replace(r'^12', 12, regex=True, inplace=True)
-    # test['Open Date'] = test['Open Date'].values[:2]
-
+    
     print(train.to_string())
-
-    # apply regression model
-    '''
-    tempSeries = pd.Series(test['Open Date'], dtype=np.int32)
-    test['Open Date'] = tempSeries
-    print(train.head(2))
-
-    rf = RandomForestRegressor(n_estimators=1000, random_state=42)
-    rf.fit(features, labels)
-    '''
 
     from sklearn.ensemble import RandomForestRegressor
     from sklearn.datasets import make_regression
@@ -171,64 +216,68 @@ def predict():
     file.write(train.to_html())
     file.close()
 
-# apply machine learning
+def ridge ():
+    '''
+    Ridge Regression
+    '''
+    train, test = split()
 
-# ridge regression
-# from sklearn.model_selection import GridSearchCV # assess predictability
+    # prepare data 
+    # change data type of Open Date (str -> int/float)
 
-# from sklearn.linear_model import Lasso, Ridge, ElasticNet
-# from sklearn.ensemble import AdaBoostRegressor
-# from xgboost import XGBRegressor
+    # train
+    train.replace('Big Cities', 1, inplace=True)
+    train.replace('Other', 0, inplace=True)
+    train.replace('IL', 1, inplace=True)
+    train.replace('FC', 0, inplace=True)
+    train.replace('DT', 2, inplace=True)
+    tempSeries1 = pd.Series(dtype=int)
+    train.replace(to_replace=r'^01', value=1, regex=True, inplace=True)
+    train.replace(r'^02', 2, regex=True, inplace=True)
+    train.replace(r'^03', 3, regex=True, inplace=True)
+    train.replace(r'^04', 4, regex=True, inplace=True)
+    train.replace(r'^05', 5, regex=True, inplace=True)
+    train.replace(r'^06', 6, regex=True, inplace=True)
+    train.replace(r'^07', 7, regex=True, inplace=True)
+    train.replace(r'^08', 8, regex=True, inplace=True)
+    train.replace(r'^09', 9, regex=True, inplace=True)
+    train.replace(r'^10', 10, regex=True, inplace=True)
+    train.replace(r'^11', 11, regex=True, inplace=True)
+    train.replace(r'^12', 12, regex=True, inplace=True)
+  
+    # test
+    test.replace('Big Cities', 1, inplace=True)
+    test.replace('Other', 0, inplace=True)
+    test.replace('IL', 1, inplace=True)
+    test.replace('FC', 0, inplace=True)
+    test.replace('DT', 2, inplace=True)
+    test.replace(r'^01', 1, regex=True, inplace=True)
+    test.replace(r'^02', 2, regex=True, inplace=True)
+    test.replace(r'^03', 3, regex=True, inplace=True)
+    test.replace(r'^04', 4, regex=True, inplace=True)
+    test.replace(r'^05', 5, regex=True, inplace=True)
+    test.replace(r'^06', 6, regex=True, inplace=True)
+    test.replace(r'^07', 7, regex=True, inplace=True)
+    test.replace(r'^08', 8, regex=True, inplace=True)
+    test.replace(r'^09', 9, regex=True, inplace=True)
+    test.replace(r'^10', 10, regex=True, inplace=True)
+    test.replace(r'^11', 11, regex=True, inplace=True)
+    test.replace(r'^12', 12, regex=True, inplace=True)
+    
+    print(train.to_string())
+    
+    from sklearn.model_selection import GridSearchCV # assess predictability
+    from sklearn.linear_model import Lasso, Ridge, ElasticNet
+    from sklearn.ensemble import AdaBoostRegressor
+    from xgboost import XGBRegressor
 
-# bestEstimators = []
+    bestEstimators = []
 
-# define parameter
+    # define parameter
 
-
-# 2. When to open a restaurant?
-
-# extract month
-df_train['month'] = pd.DatetimeIndex(df_train['Open Date']).month
-print(df_train)
-
-#group by month
-df_3 = df_train[['month','revenue']].groupby('month').revenue.sum()
-print(df_3)
-
-#bar chart months by revenue
-divisions = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
-division_average_marks = [64909366.0, 46080202.0, 43665123.0, 23630484.0, 36578002.0, 33985929.0, 27668769.0, 66011346.0, 59299412.0, 78552564.0, 56656797.0, 73095974.0]
-
-plt.bar(divisions, division_average_marks, color='red')
-plt.title('When is the best month to open a restaurant?')
-plt.xlabel('Months Jan-Dec')
-plt.ylabel('Revenue')
-plt.show()
-
-# extract month
-
-df_train['month'] = pd.DatetimeIndex(df_train['Open Date']).month
-print(df_train)
-
-# 3. Which type is the best economic choice?
-
-# group by type
-df_3 = df_train[['Type','revenue']].groupby('Type').revenue.sum()
-print(df_3)
-
-# bar chart type by revenue
-
-divisions = ['Food Court', 'In Line', 'Drive Through']
-division_average_marks = [3810007.0, 355981207.0, 250342754.0]
-
-plt.bar(divisions, division_average_marks, color='blue')
-plt.title('Which type makes the most revenue?')
-plt.xlabel('Types of restaurants')
-plt.ylabel('Revenue')
-plt.show()
 
 
 def main():
-    predict()
+    type()
 if __name__ == "__main__":
     main()
