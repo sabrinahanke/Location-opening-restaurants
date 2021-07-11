@@ -8,6 +8,14 @@ import IPython as IPy  # needed for hab's vergessen und bin zu faul zum googeln
 import sklearn.model_selection as sk
 from sklearn.ensemble import RandomForestRegressor
 import datetime
+from sklearn.model_selection import GridSearchCV
+from sklearn.linear_model import Ridge
+from sklearn.ensemble import AdaBoostRegressor
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import KFold, cross_val_score
+from sklearn.model_selection import train_test_split
+
 
 # import data sets
 
@@ -27,12 +35,6 @@ def format():
     print('dtype: ', train_data.dtypes)  # analyse data type of each column
     print('First 3 rows of the train data:', train_data.head(3))
 
-
-# analyse train data
-def check_data():
-    train_data.isna().sum()  # check for null entries
-
-
 # disply missings
 def missing_values():
     """
@@ -40,10 +42,7 @@ def missing_values():
     """
     print('Missings in the train data:', train_data.isnull().sum())
 
-
 # data is ready to be worked with!
-
-
 def juhu():
     """
     Celebrates that the data set was already pretty nice so we didn't have to do a lot lol
@@ -52,51 +51,55 @@ def juhu():
 
 
 # statistical analysis
-
-# calculate basic statistics
 def basic_statistics():
     """
     Gives back basic statistical calculations
     """
-    train_data['revenue'].describe()
+    print(train_data['revenue'].describe())
+    plt.hist(train_data['revenue'], color = 'blue', edgecolor = 'black',
+        bins = int(4))
 
+    # Add labels
+    plt.title('Histogram of Revenues')
+    plt.xlabel('revenues')
+    plt.ylabel('P(revenues)')
+    plt.show()
+    
+def best_city():
+    '''
+    gives back cities according to their average revenues
+    '''
+    categorical_features = train_data.select_dtypes(exclude = [np.number,np.datetime64]).columns.tolist()
 
-# question-specific statisitcs
-# open date
+    fig, ax = plt.subplots(3, 1, figsize=(40, 30))
+    for variable, subplot in zip(categorical_features, ax.flatten()):
+        df_2 = train_data[[variable,'revenue']].groupby(variable).revenue.sum().reset_index()
+        df_2.columns = [variable,'total_revenue']
+        sns.barplot(x=variable, y='total_revenue', data=df_2 , ax=subplot)
+        for label in subplot.get_xticklabels():
+            label.set_rotation(90)
 
-# city
-# train_data.groupby("City")["Id"].count()
-# train_data.groupby(["City"], ["Type"])["Id"].count()
-
-# city group
-
-# restaurant type
-# train_data.groupby("Type")["Id"].count()
-
-# revenue
-def revenue_analysis():
-    print('ID of most profitable restarant:', train_data["revenue"].max)
-
-
-# visualization
-
-# identify most, least and average profitable restaurant
-
-# divide train_data set
-def split():
-    train_modified = train_data.drop(
-        labels=['City'], axis=1)
-    train, test = sk.train_test_split(train_modified, test_size=0.25, train_size=0.75)
-    # print(train)
-    # print(test)
-    return train, test
-
-
+   
 # 1. Where to open a restaurant?
-def where():
-    train, test = split()
-    train = train.drop(lables=['Open Date', 'Type'])
-    test = test.drop(lables=['Open Date', 'Type'])
+def city():
+    '''
+    plots variance of the asked characterisitcs City, City Group and Restaurant Type
+    '''
+    categorical_features = train_data.select_dtypes(exclude = [np.number,np.datetime64]).columns.tolist()
+
+    fig, ax = plt.subplots(3, 1, figsize=(50, 40))
+    for var, subplot in zip(categorical_features, ax.flatten()):
+        sns.boxplot(x=var, y='revenue', data=train_data, ax=subplot)
+
+    # bar chart city type by revenue
+    divisions = ['Big Cities', 'Other']
+    division_average_marks = [64909366.0, 46080202.0]
+
+    plt.bar(divisions, division_average_marks, color='blue')
+    plt.title('Which city type is best to open a restaurant?')
+    plt.xlabel('City Type')
+    plt.ylabel('Revenue')
+    plt.show()
 
 # 2. When to open a restaurant?
 def when():
@@ -107,14 +110,14 @@ def when():
     print(train_data)
 
     #group by month
-    df_3 = train_data[['month','revenue']].groupby('month').revenue.sum()
+    df_3 = train_data[['month','revenue']].groupby('month').revenue.mean()
     print(df_3)
 
     #bar chart months by revenue
     divisions = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
     division_average_marks = [64909366.0, 46080202.0, 43665123.0, 23630484.0, 36578002.0, 33985929.0, 27668769.0, 66011346.0, 59299412.0, 78552564.0, 56656797.0, 73095974.0]
 
-    plt.bar(divisions, division_average_marks, color='red')
+    plt.bar(divisions, division_average_marks, color='blue')
     plt.title('When is the best month to open a restaurant?')
     plt.xlabel('Months Jan-Dec')
     plt.ylabel('Revenue')
@@ -124,7 +127,6 @@ def when():
 
     train_data['month'] = pd.DatetimeIndex(train_data['Open Date']).month
     print(train_data)
-
 
 # 3. Which type is the best economic choice?
 def type():
@@ -145,13 +147,19 @@ def type():
     plt.ylabel('Revenue')
     plt.show()
 
+########################################################################################################
 
 # PREDICTION TOOL
-def prep():
+def split():
     '''
     divides train_data into test and training set
     '''
+    train_modified = train_data.drop(
+        labels=['City'], axis=1)
+    train, test = sk.train_test_split(train_modified, test_size=0.25, train_size=0.75)
+    return train, test
 
+best_estimators = []    
 
 def random_forest():
     '''
@@ -160,6 +168,7 @@ def random_forest():
     train, test = split()
 
     # prepare data 
+
     # change data type of Open Date (str -> int/float)
 
     # train
@@ -210,18 +219,30 @@ def random_forest():
     regr.fit(X, y)
 
     print(regr.predict(train))
-
+    
     # print result 
     file = open('jasminsDataframe.html', 'x')
     file.write(train.to_html())
     file.close()
 
+    # calculate score
+    print(regr.score(X, y))
+    
+    '''     
+    # append to list
+    best_estimators.append(["Random Forest",regr.best_estimator_])
+    '''
+
 def ridge ():
     '''
     Ridge Regression
     '''
+    # Split the data into train and test set and drop revenues for test
     train, test = split()
+    # test_modified = test.drop('revenue', axis=1)
 
+    # print("Shapes: Train set ", train.shape ,", Test ",test.shape)
+    
     # prepare data 
     # change data type of Open Date (str -> int/float)
 
@@ -265,19 +286,34 @@ def ridge ():
     test.replace(r'^12', 12, regex=True, inplace=True)
     
     print(train.to_string())
-    
-    from sklearn.model_selection import GridSearchCV # assess predictability
-    from sklearn.linear_model import Lasso, Ridge, ElasticNet
-    from sklearn.ensemble import AdaBoostRegressor
-    from xgboost import XGBRegressor
-
-    bestEstimators = []
-
+            
     # define parameter
+    params = {
+        "alpha" : [.01, .1, .5, .7, .9, .95, .99, 1, 5, 10, 20],
+        "fit_intercept" : [True, False],
+        "normalize" : [True,False],
+        "solver" : ['svd', 'cholesky', 'lsqr', 'sparse_cg', 'sag', 'saga'],
+        "tol" : [0.0001, 0.001, 0.01, 0.1],
+        "random_state" : [42]
+    }
 
+    # ridge
+    ridge = Ridge()
+    ridge_grid = GridSearchCV(ridge, params, scoring='r2', cv=5, n_jobs=-1)
+    ridge_grid.fit(train, test)
 
+    # output
+    print("Best parameters:  {}:".format(ridge_grid.best_params_))
+    print("Best score: {}".format(ridge_grid.best_score_))
+
+    # append to list
+    best_estimators.append(["Ridge",ridge_grid.best_estimator_])
+
+######################################################################################################
+
+# main function
 
 def main():
-    type()
+    random_forest()
 if __name__ == "__main__":
     main()
